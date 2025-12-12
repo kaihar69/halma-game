@@ -1,39 +1,35 @@
 const socket = io();
-
-// --- SOUNDS ---
-// Wir nutzen bessere Platzhalter-Sounds
 const sounds = {
-    move: new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'), // Plop sound
-    win: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),   // Tada sound
-    click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3')  // Soft click
+    move: new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'),
+    win: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+    click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3')
 };
-Object.values(sounds).forEach(s => s.volume = 0.6);
+Object.values(sounds).forEach(s => s.volume = 0.5);
 
-// --- GLOBALE VARIABLEN ---
 let myColor = null;
 let currentPlayers = {};
 let selectedPieceIndex = null;
 let validMoves = [];
 
-// --- BOARD INITIALISIERUNG ---
+// --- BRETT STRUKTUR ---
 const starMap = [
-    "            0            ",
-    "           0 0           ", 
-    "          0 0 0          ", 
-    "         0 0 0 0         ", 
-    "0 0 0 0 0 0 0 0 0 0 0 0 0",
+    "            0            ", // 0: Grün Spitze (Haus)
+    "           0 0           ", // 1
+    "          0 0 0          ", // 2
+    "         0 0 0 0         ", // 3: Grün Ende
+    "0 0 0 0 0 0 0 0 0 0 0 0 0", 
     " 0 0 0 0 0 0 0 0 0 0 0 0 ", 
     "  0 0 0 0 0 0 0 0 0 0 0  ", 
-    "   0 0 0 0 0 0 0 0 0 0   ", 
+    "   0 0 0 0 0 0 0 0 0 0   ", // 8: Mitte
     "    0 0 0 0 0 0 0 0 0    ",
     "   0 0 0 0 0 0 0 0 0 0   ", 
     "  0 0 0 0 0 0 0 0 0 0 0  ", 
     " 0 0 0 0 0 0 0 0 0 0 0 0 ", 
     "0 0 0 0 0 0 0 0 0 0 0 0 0", 
-    "         0 0 0 0         ",
+    "         0 0 0 0         ", // 13: Rot Anfang
     "          0 0 0          ", 
     "           0 0           ", 
-    "            0            " 
+    "            0            "  // 16: Rot Spitze (Haus)
 ];
 
 const boardElement = document.getElementById('board');
@@ -44,10 +40,19 @@ function initBoard() {
         const rowStr = starMap[y];
         for (let x = 0; x < rowStr.length; x++) {
             const cell = document.createElement('div');
+            
             if (rowStr[x] === '0') {
                 cell.classList.add('cell');
                 cell.dataset.x = x;
                 cell.dataset.y = y;
+
+                // --- ZONEN FARBIG MARKIEREN ---
+                // Oben (0-3) ist das Haus von GRÜN (und Ziel von Rot)
+                if (y <= 3) cell.classList.add('base-green');
+                
+                // Unten (13-16) ist das Haus von ROT (und Ziel von Grün)
+                if (y >= 13) cell.classList.add('base-red');
+
                 cell.addEventListener('click', () => onCellClick(x, y));
             } else {
                 cell.classList.add('cell', 'void');
@@ -58,8 +63,7 @@ function initBoard() {
 }
 initBoard();
 
-// --- INTERAKTION ---
-
+// --- ZÜGE ---
 function onCellClick(x, y) {
     if (selectedPieceIndex !== null) {
         const move = validMoves.find(m => m.x === x && m.y === y);
@@ -74,15 +78,14 @@ function onCellClick(x, y) {
 
 function onPieceClick(e, playerColor, pieceIndex) {
     e.stopPropagation();
+    // Nur interagieren, wenn es MEIN Stein ist
     if (playerColor !== myColor) return;
 
-    sounds.click.play(); // Sound Feedback beim Auswählen
+    sounds.click.play();
 
     if (selectedPieceIndex === pieceIndex) {
-        clearSelection(); // Abwählen bei erneutem Klick
-        return;
+        clearSelection(); return;
     }
-
     selectedPieceIndex = pieceIndex;
     
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('selected'));
@@ -108,18 +111,16 @@ function highlightMoves() {
     });
 }
 
-// --- LOGIK (Unverändert) ---
+// --- LOGIK ---
 function calculateValidMoves(sx, sy) {
     let moves = [];
     let occupied = new Set();
     Object.values(currentPlayers).forEach(p => {
         p.pieces.forEach(pos => occupied.add(`${pos.x},${pos.y}`));
     });
-
     getNeighbors(sx, sy).forEach(n => {
         if (!occupied.has(`${n.x},${n.y}`) && isBoardField(n.x, n.y)) moves.push(n);
     });
-
     moves.push(...getJumps(sx, sy, occupied, new Set([`${sx},${sy}`])));
     return moves;
 }
@@ -148,8 +149,7 @@ function isBoardField(x, y) {
     return y >= 0 && y < starMap.length && x >= 0 && x < starMap[y].length && starMap[y][x] === '0';
 }
 
-// --- RENDERING (Angepasst für neue Klassen) ---
-
+// --- RENDER ---
 socket.on('updateBoard', (players) => {
     currentPlayers = players;
     renderPieces();
@@ -162,14 +162,16 @@ function renderPieces() {
             const cell = document.querySelector(`.cell[data-x="${pos.x}"][data-y="${pos.y}"]`);
             if (cell) {
                 const piece = document.createElement('div');
-                // WICHTIG: Die Farb-Klasse (red/green) wird hier hinzugefügt
                 piece.classList.add('piece', player.color);
                 
-                // Wenn dieser Stein gerade ausgewählt ist, Klasse wieder hinzufügen
+                // --- VISUELLES FEEDBACK: DAS SIND MEINE! ---
+                if (player.color === myColor) {
+                    piece.classList.add('mine'); // Bekommt Cursor-Pointer
+                }
+
                 if (myColor === player.color && selectedPieceIndex === index) {
                     piece.classList.add('selected');
                 }
-
                 piece.addEventListener('click', (e) => onPieceClick(e, player.color, index));
                 cell.appendChild(piece);
             }
@@ -177,44 +179,71 @@ function renderPieces() {
     });
 }
 
-socket.on('playSound', (type) => { if(sounds[type]) sounds[type].play().catch(()=>{}); });
-
-// --- LOBBY (Unverändert) ---
+// --- LOBBY & UI ---
 const landingView = document.getElementById('landing-view');
 const gameView = document.getElementById('game-view');
-const landingName = document.getElementById('landingNameInput');
-const createGameBtn = document.getElementById('createGameBtn');
-const joinGameBtn = document.getElementById('joinGameBtn');
-const roomCodeInput = document.getElementById('roomCodeInput');
-const landingMsg = document.getElementById('landing-msg');
 const startBtn = document.getElementById('startBtn');
 
-createGameBtn.addEventListener('click', () => {
-    const name = landingName.value; if(!name) { landingMsg.innerText="Name fehlt!"; return;}
-    socket.emit('createGame', name);
+document.getElementById('createGameBtn').addEventListener('click', () => {
+    const name = document.getElementById('landingNameInput').value;
+    if(name) socket.emit('createGame', name);
 });
-joinGameBtn.addEventListener('click', () => {
-    const name = landingName.value; const code = roomCodeInput.value;
-    if(!name || !code) { landingMsg.innerText="Daten fehlen!"; return;}
-    socket.emit('requestJoin', {name, roomId: code});
+document.getElementById('joinGameBtn').addEventListener('click', () => {
+    const name = document.getElementById('landingNameInput').value;
+    const code = document.getElementById('roomCodeInput').value;
+    if(name && code) socket.emit('requestJoin', {name, roomId: code});
 });
 startBtn.addEventListener('click', () => socket.emit('startGame'));
 
 socket.on('joinSuccess', (data) => {
-    landingView.style.display = 'none'; gameView.style.display = 'block';
+    landingView.style.display = 'none'; 
+    gameView.style.display = 'block';
+    
     myColor = data.players[data.id].color;
+    
+    // --- Identität anzeigen ---
+    const myColorEl = document.getElementById('my-color-display');
+    const badge = document.getElementById('identity-badge');
+    
+    if (myColor === 'red') {
+        myColorEl.innerText = "ROT (Unten)";
+        badge.style.borderColor = "#e74c3c";
+        badge.style.color = "#c0392b";
+    } else {
+        myColorEl.innerText = "GRÜN (Oben)";
+        badge.style.borderColor = "#2ecc71";
+        badge.style.color = "#27ae60";
+    }
+
     document.getElementById('current-room-code').innerText = data.roomId;
 });
+
 socket.on('gameStarted', () => {
     startBtn.style.display = 'none';
-    document.getElementById('log-container').innerText = "Spiel gestartet!";
+    document.getElementById('log-container').innerText = "Spiel gestartet! Rot beginnt.";
 });
+
 socket.on('turnUpdate', (color) => {
     const nameEl = document.getElementById('current-player-name');
-    nameEl.innerText = color.toUpperCase();
-    nameEl.style.color = color === 'red' ? '#ff6b6b' : '#5ecc71';
+    const logEl = document.getElementById('log-container');
+    
+    // Wer ist dran?
+    const isMe = (color === myColor);
+    
+    nameEl.innerText = isMe ? "DU!" : color.toUpperCase();
+    nameEl.style.color = (color === 'red') ? '#c0392b' : '#27ae60';
+    
+    if (isMe) {
+        logEl.innerText = "Du bist am Zug!";
+        logEl.style.color = "#d35400";
+    } else {
+        logEl.innerText = "Gegner überlegt...";
+        logEl.style.color = "#7f8c8d";
+    }
 });
-socket.on('joinError', (msg) => { landingMsg.innerText = msg; });
+
+socket.on('playSound', (type) => { if(sounds[type]) sounds[type].play().catch(()=>{}); });
+socket.on('joinError', (msg) => { document.getElementById('landing-msg').innerText = msg; });
 socket.on('gameLog', (msg) => { document.getElementById('log-container').innerText = msg; });
 
 document.querySelectorAll('.emote-btn').forEach(btn => {
