@@ -4,7 +4,6 @@ const sounds = {
     win: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
     click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3')
 };
-Object.values(sounds).forEach(s => s.volume = 0.5);
 
 let myColor = null;
 let currentPlayers = {};
@@ -12,25 +11,28 @@ let selectedPieceIndex = null;
 let validMoves = [];
 
 // --- BRETT STRUKTUR ---
-const starMap = [
-    "            0            ", // 0: Grün Spitze (Haus)
-    "           0 0           ", // 1
-    "          0 0 0          ", // 2
-    "         0 0 0 0         ", // 3: Grün Ende
+// Wir stellen sicher, dass jede Zeile exakt 25 Zeichen lang ist
+const rawMap = [
+    "            0            ", 
+    "           0 0           ", 
+    "          0 0 0          ", 
+    "         0 0 0 0         ", 
     "0 0 0 0 0 0 0 0 0 0 0 0 0", 
     " 0 0 0 0 0 0 0 0 0 0 0 0 ", 
     "  0 0 0 0 0 0 0 0 0 0 0  ", 
-    "   0 0 0 0 0 0 0 0 0 0   ", // 8: Mitte
+    "   0 0 0 0 0 0 0 0 0 0   ", 
     "    0 0 0 0 0 0 0 0 0    ",
     "   0 0 0 0 0 0 0 0 0 0   ", 
     "  0 0 0 0 0 0 0 0 0 0 0  ", 
     " 0 0 0 0 0 0 0 0 0 0 0 0 ", 
     "0 0 0 0 0 0 0 0 0 0 0 0 0", 
-    "         0 0 0 0         ", // 13: Rot Anfang
+    "         0 0 0 0         ",
     "          0 0 0          ", 
     "           0 0           ", 
-    "            0            "  // 16: Rot Spitze (Haus)
+    "            0            "
 ];
+// Auffüllen mit Leerzeichen, falls beim Kopieren was verloren ging
+const starMap = rawMap.map(row => row.padEnd(25, ' '));
 
 const boardElement = document.getElementById('board');
 
@@ -46,13 +48,10 @@ function initBoard() {
                 cell.dataset.x = x;
                 cell.dataset.y = y;
 
-                // --- ZONEN FARBIG MARKIEREN ---
-                // Oben (0-3) ist das Haus von GRÜN (und Ziel von Rot)
                 if (y <= 3) cell.classList.add('base-green');
-                
-                // Unten (13-16) ist das Haus von ROT (und Ziel von Grün)
                 if (y >= 13) cell.classList.add('base-red');
 
+                // Klick auf das Loch (um Stein zu bewegen)
                 cell.addEventListener('click', () => onCellClick(x, y));
             } else {
                 cell.classList.add('cell', 'void');
@@ -63,36 +62,55 @@ function initBoard() {
 }
 initBoard();
 
-// --- ZÜGE ---
+// --- ZUG-INTERAKTION ---
+
 function onCellClick(x, y) {
+    console.log(`Klick auf Zelle: ${x}, ${y}`);
+    
+    // Wenn ich einen Stein ausgewählt habe...
     if (selectedPieceIndex !== null) {
+        // ...prüfe ich, ob das angeklickte Feld in den erlaubten Zügen ist
         const move = validMoves.find(m => m.x === x && m.y === y);
+        
         if (move) {
+            console.log("Gültiger Zug! Sende an Server...");
             socket.emit('movePiece', { pieceIndex: selectedPieceIndex, target: {x, y} });
             clearSelection();
         } else {
-            clearSelection();
+            console.log("Ungültiges Ziel.");
+            clearSelection(); // Klick ins Leere hebt Auswahl auf
         }
     }
 }
 
 function onPieceClick(e, playerColor, pieceIndex) {
-    e.stopPropagation();
-    // Nur interagieren, wenn es MEIN Stein ist
-    if (playerColor !== myColor) return;
+    e.stopPropagation(); // Wichtig: Nicht das Cell-Click Event feuern!
+    console.log(`Klick auf Stein: ${playerColor}, Index: ${pieceIndex}. Ich bin: ${myColor}`);
 
-    sounds.click.play();
-
-    if (selectedPieceIndex === pieceIndex) {
-        clearSelection(); return;
+    if (playerColor !== myColor) {
+        console.log("Nicht mein Stein.");
+        return;
     }
+
+    sounds.click.play().catch(()=>{});
+
+    // Toggle Auswahl
+    if (selectedPieceIndex === pieceIndex) {
+        clearSelection();
+        return;
+    }
+
     selectedPieceIndex = pieceIndex;
     
+    // Visuelles Feedback
     document.querySelectorAll('.piece').forEach(p => p.classList.remove('selected'));
     e.target.classList.add('selected');
 
+    // Mögliche Züge berechnen
     const piecePos = currentPlayers[socket.id].pieces[pieceIndex];
     validMoves = calculateValidMoves(piecePos.x, piecePos.y);
+    console.log(`Mögliche Züge für diesen Stein:`, validMoves);
+    
     highlightMoves();
 }
 
@@ -111,33 +129,56 @@ function highlightMoves() {
     });
 }
 
-// --- LOGIK ---
+// --- LOGIK: BEWEGUNG & SPRÜNGE ---
+
 function calculateValidMoves(sx, sy) {
     let moves = [];
     let occupied = new Set();
+    
+    // Wo stehen alle Steine?
     Object.values(currentPlayers).forEach(p => {
         p.pieces.forEach(pos => occupied.add(`${pos.x},${pos.y}`));
     });
+
+    // 1. Nachbarn prüfen (Gehen)
     getNeighbors(sx, sy).forEach(n => {
-        if (!occupied.has(`${n.x},${n.y}`) && isBoardField(n.x, n.y)) moves.push(n);
+        // Wenn Nachbar auf Brett UND NICHT besetzt -> Gehen erlaubt
+        if (!occupied.has(`${n.x},${n.y}`) && isBoardField(n.x, n.y)) {
+            moves.push(n);
+        }
     });
+
+    // 2. Sprünge prüfen (Rekursiv)
     moves.push(...getJumps(sx, sy, occupied, new Set([`${sx},${sy}`])));
+    
     return moves;
 }
 
 function getNeighbors(x, y) {
-    return [{x:x-2,y:y},{x:x+2,y:y},{x:x-1,y:y-1},{x:x+1,y:y-1},{x:x-1,y:y+1},{x:x+1,y:y+1}];
+    // Halma Gitter Versatz Logik
+    return [
+        {x:x-2, y:y}, {x:x+2, y:y},     // Horizontal
+        {x:x-1, y:y-1}, {x:x+1, y:y-1}, // Oben
+        {x:x-1, y:y+1}, {x:x+1, y:y+1}  // Unten
+    ];
 }
 
 function getJumps(x, y, occupied, visited) {
     let jumps = [];
     getNeighbors(x, y).forEach(n => {
+        // Ist da ein Stein ("Bock")?
         if (occupied.has(`${n.x},${n.y}`)) {
-            const target = {x: n.x + (n.x - x), y: n.y + (n.y - y)};
+            // Landeplatz dahinter berechnen
+            const dx = n.x - x;
+            const dy = n.y - y;
+            const target = {x: n.x + dx, y: n.y + dy};
             const key = `${target.x},${target.y}`;
+
+            // Ist Landeplatz frei, auf dem Brett und noch nicht besucht?
             if (!occupied.has(key) && isBoardField(target.x, target.y) && !visited.has(key)) {
                 visited.add(key);
                 jumps.push(target);
+                // Von hier aus weiter springen (Kette)?
                 jumps.push(...getJumps(target.x, target.y, occupied, visited));
             }
         }
@@ -146,10 +187,14 @@ function getJumps(x, y, occupied, visited) {
 }
 
 function isBoardField(x, y) {
-    return y >= 0 && y < starMap.length && x >= 0 && x < starMap[y].length && starMap[y][x] === '0';
+    if (y < 0 || y >= starMap.length) return false;
+    if (x < 0 || x >= starMap[y].length) return false;
+    return starMap[y][x] === '0';
 }
 
-// --- RENDER ---
+
+// --- SOCKET & UI ---
+
 socket.on('updateBoard', (players) => {
     currentPlayers = players;
     renderPieces();
@@ -157,6 +202,7 @@ socket.on('updateBoard', (players) => {
 
 function renderPieces() {
     document.querySelectorAll('.piece').forEach(e => e.remove());
+    
     Object.values(currentPlayers).forEach(player => {
         player.pieces.forEach((pos, index) => {
             const cell = document.querySelector(`.cell[data-x="${pos.x}"][data-y="${pos.y}"]`);
@@ -164,14 +210,9 @@ function renderPieces() {
                 const piece = document.createElement('div');
                 piece.classList.add('piece', player.color);
                 
-                // --- VISUELLES FEEDBACK: DAS SIND MEINE! ---
-                if (player.color === myColor) {
-                    piece.classList.add('mine'); // Bekommt Cursor-Pointer
-                }
+                if (player.color === myColor) piece.classList.add('mine');
+                if (player.color === myColor && selectedPieceIndex === index) piece.classList.add('selected');
 
-                if (myColor === player.color && selectedPieceIndex === index) {
-                    piece.classList.add('selected');
-                }
                 piece.addEventListener('click', (e) => onPieceClick(e, player.color, index));
                 cell.appendChild(piece);
             }
@@ -179,7 +220,7 @@ function renderPieces() {
     });
 }
 
-// --- LOBBY & UI ---
+// --- MENÜ STEUERUNG ---
 const landingView = document.getElementById('landing-view');
 const gameView = document.getElementById('game-view');
 const startBtn = document.getElementById('startBtn');
@@ -193,58 +234,56 @@ document.getElementById('joinGameBtn').addEventListener('click', () => {
     const code = document.getElementById('roomCodeInput').value;
     if(name && code) socket.emit('requestJoin', {name, roomId: code});
 });
-startBtn.addEventListener('click', () => socket.emit('startGame'));
+
+startBtn.addEventListener('click', () => {
+    socket.emit('startGame');
+});
+
+// WICHTIG: Server sagt, wir dürfen starten
+socket.on('readyToStart', () => {
+    startBtn.style.display = 'inline-block';
+    document.getElementById('log-container').innerText = "Bereit zum Start!";
+});
 
 socket.on('joinSuccess', (data) => {
     landingView.style.display = 'none'; 
     gameView.style.display = 'block';
-    
     myColor = data.players[data.id].color;
     
-    // --- Identität anzeigen ---
-    const myColorEl = document.getElementById('my-color-display');
+    // UI Updates
     const badge = document.getElementById('identity-badge');
-    
-    if (myColor === 'red') {
+    const myColorEl = document.getElementById('my-color-display');
+    if(myColor === 'red') {
         myColorEl.innerText = "ROT (Unten)";
-        badge.style.borderColor = "#e74c3c";
-        badge.style.color = "#c0392b";
+        badge.style.border = "2px solid #c0392b";
     } else {
         myColorEl.innerText = "GRÜN (Oben)";
-        badge.style.borderColor = "#2ecc71";
-        badge.style.color = "#27ae60";
+        badge.style.border = "2px solid #27ae60";
     }
-
     document.getElementById('current-room-code').innerText = data.roomId;
 });
 
 socket.on('gameStarted', () => {
     startBtn.style.display = 'none';
-    document.getElementById('log-container').innerText = "Spiel gestartet! Rot beginnt.";
 });
 
 socket.on('turnUpdate', (color) => {
     const nameEl = document.getElementById('current-player-name');
+    nameEl.innerText = color === 'red' ? "ROT" : "GRÜN";
+    nameEl.style.color = color === 'red' ? "#c0392b" : "#27ae60";
+    
     const logEl = document.getElementById('log-container');
-    
-    // Wer ist dran?
-    const isMe = (color === myColor);
-    
-    nameEl.innerText = isMe ? "DU!" : color.toUpperCase();
-    nameEl.style.color = (color === 'red') ? '#c0392b' : '#27ae60';
-    
-    if (isMe) {
+    if (color === myColor) {
         logEl.innerText = "Du bist am Zug!";
         logEl.style.color = "#d35400";
     } else {
-        logEl.innerText = "Gegner überlegt...";
+        logEl.innerText = "Gegner zieht...";
         logEl.style.color = "#7f8c8d";
     }
 });
 
-socket.on('playSound', (type) => { if(sounds[type]) sounds[type].play().catch(()=>{}); });
-socket.on('joinError', (msg) => { document.getElementById('landing-msg').innerText = msg; });
 socket.on('gameLog', (msg) => { document.getElementById('log-container').innerText = msg; });
+socket.on('playSound', (type) => { if(sounds[type]) sounds[type].play().catch(()=>{}); });
 
 document.querySelectorAll('.emote-btn').forEach(btn => {
     btn.addEventListener('click', () => socket.emit('sendEmote', btn.innerText));
