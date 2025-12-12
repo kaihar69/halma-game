@@ -2,17 +2,18 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Halma Web-App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Halma Chef-Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="lobbyScreen">
         <h1>Halma Online</h1>
+        
         <div id="joinControls">
-            <input type="text" id="roomInput" value="Kaffeepause" placeholder="Raumname">
-            <button onclick="joinRoom()">Beitreten</button>
+            <input type="text" id="roomInput" value="ChefBuero" placeholder="Raumname">
+            <button id="btnJoin">Beitreten</button>
         </div>
         
         <div id="adminControls" style="display:none;">
@@ -20,11 +21,12 @@
             <select id="startSelection">
                 <option value="1">Ich (Spieler 1)</option>
                 <option value="2">Gegner (Spieler 2)</option>
-                <option value="random">Zufall</option>
+                <option value="random">Zufall 🎲</option>
             </select>
-            <button onclick="sendStartSignal()">SPIEL STARTEN</button>
+            <button id="btnStart">SPIEL STARTEN</button>
         </div>
-        <p id="statusMsg">Bitte Raum wählen...</p>
+        
+        <p id="statusMsg" style="margin-top: 20px; color: #666;">Bitte Raum wählen...</p>
     </div>
 
     <canvas id="gameCanvas"></canvas>
