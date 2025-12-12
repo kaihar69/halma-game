@@ -1,15 +1,49 @@
-body { margin: 0; overflow: hidden; font-family: sans-serif; background: #333; }
-canvas { display: block; background: #f0f0f0; touch-action: none; }
+body {
+    margin: 0;
+    overflow: hidden; /* Kein Scrollen */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #333;
+    touch-action: none; /* Wichtig für Handy-Touch */
+}
+
+canvas {
+    display: block;
+    background-color: #f4f4f4;
+    margin: 0 auto; /* Zentrieren */
+}
 
 #lobbyScreen {
     position: absolute;
-    top: 50%; left: 50%;
+    top: 50%; 
+    left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 30px;
-    border-radius: 10px;
+    padding: 40px;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    z-index: 100;
+    min-width: 300px;
 }
-button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px;}
-input { padding: 10px; font-size: 16px; }
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover { background-color: #218838; }
+
+input, select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    width: 80%;
+}
