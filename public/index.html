@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Halma Web-App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div id="lobbyScreen">
+        <h1>Halma Online</h1>
+        <div id="joinControls">
+            <input type="text" id="roomInput" value="Kaffeepause" placeholder="Raumname">
+            <button onclick="joinRoom()">Beitreten</button>
+        </div>
+        
+        <div id="adminControls" style="display:none;">
+            <p>Gegner ist da! Wer beginnt?</p>
+            <select id="startSelection">
+                <option value="1">Ich (Spieler 1)</option>
+                <option value="2">Gegner (Spieler 2)</option>
+                <option value="random">Zufall</option>
+            </select>
+            <button onclick="sendStartSignal()">SPIEL STARTEN</button>
+        </div>
+        <p id="statusMsg">Bitte Raum wählen...</p>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
