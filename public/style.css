@@ -1,74 +1,93 @@
 :root {
-    --board-bg: #2c3e50; /* Dunkles Brett-Material */
-    --hole-bg: #1a252f;  /* Vertiefung */
-    --red-piece-1: #ff6b6b; --red-piece-2: #c0392b;
-    --green-piece-1: #5ecc71; --green-piece-2: #27ae60;
-    --highlight: #f1c40f;
+    /* FREUNDLICHER HOLZ-LOOK */
+    --body-bg: #8d6e63; /* Warmer Tisch-Hintergrund */
+    --board-bg: #f5deb3; /* Helles Holzbrett (Wheat) */
+    --board-border: #8d6e63;
+    
+    /* Löcher (unbesetzt) */
+    --hole-bg: #e6c288; /* Etwas dunkler als das Brett */
+    --hole-shadow: inset 2px 2px 5px rgba(0,0,0,0.3), inset -1px -1px 2px rgba(255,255,255,0.5);
+
+    /* ZONEN-MARKIERUNGEN (Zart) */
+    --zone-red: rgba(231, 76, 60, 0.25);
+    --zone-green: rgba(46, 204, 113, 0.25);
+
+    /* SPIELER FARBEN (Knallig wie MADN) */
+    --red-piece-1: #e74c3c; --red-piece-2: #c0392b;
+    --green-piece-1: #2ecc71; --green-piece-2: #27ae60;
+    
+    --highlight: #f1c40f; /* Gelbes Leuchten für Züge */
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #e0e0e0; /* Hellerer Hintergrund wie bei MADN */
-    /* Optional: Ein leichtes Holz- oder Texturmuster für den Hintergrund */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='%239c9c9c' fill-opacity='0.05'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/g%3E%3C/svg%3E");
-    color: #333;
+    background-color: var(--body-bg);
+    /* Optional: Holzmuster Hintergrund */
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px);
     margin: 0; padding: 0;
     height: 100vh; overflow: hidden;
     display: flex; flex-direction: column; align-items: center;
+    color: #3e2723; /* Dunkelbraune Schrift */
 }
 
-/* LOBBY STYLES (MADN Stil) */
+/* LOBBY (Angepasst an Holz-Look) */
 #landing-view {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000;
+    background: rgba(62, 39, 35, 0.9); z-index: 2000;
     display: flex; justify-content: center; align-items: center;
 }
 .landing-card {
-    background: white; color: #333; padding: 40px; border-radius: 20px;
+    background: #fff8e1; color: #5d4037; padding: 40px; border-radius: 15px;
     text-align: center; width: 90%; max-width: 400px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5); border: 4px solid #8d6e63;
 }
-.landing-card h1 { margin-top: 0; color: var(--board-bg); }
-.landing-card input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #eee; border-radius: 8px; font-size: 1rem; box-sizing: border-box; text-align: center;}
-.big-btn { width: 100%; padding: 15px; border: none; background: var(--green-piece-2); color: white; cursor: pointer; border-radius: 8px; font-size: 1.1rem; font-weight: bold; transition: transform 0.1s; }
-.big-btn:active { transform: scale(0.98); }
-.big-btn.outline { background: transparent; border: 2px solid var(--board-bg); color: var(--board-bg); }
-.divider { margin: 20px 0; color: #999; font-weight: bold; }
+.landing-card h1 { margin-top: 0; color: #5d4037; }
+.landing-card input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #d7ccc8; border-radius: 8px; font-size: 1rem; box-sizing: border-box; text-align: center; background: #fff; }
+.big-btn { width: 100%; padding: 15px; border: none; background: #66bb6a; color: white; cursor: pointer; border-radius: 8px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 0 #388e3c; margin-top: 5px; }
+.big-btn:active { transform: translateY(4px); box-shadow: none; }
+.big-btn.outline { background: transparent; border: 2px solid #8d6e63; color: #8d6e63; box-shadow: none; }
+.divider { margin: 20px 0; color: #8d6e63; font-weight: bold; }
 .join-area { display: flex; gap: 10px; }
 .join-area input, .join-area button { margin: 0; flex: 1; }
-#landing-msg { color: var(--red-piece-2); margin-top: 10px; font-weight: bold; min-height: 20px; }
 
-/* GAME UI (MADN Stil Header) */
+/* GAME HEADER */
 .top-section { 
-    padding: 15px; width: 100%; text-align: center; 
-    background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 100;
+    padding: 10px; width: 100%; text-align: center; 
+    background: #fff8e1; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 100;
+    border-bottom: 3px solid #8d6e63;
 }
-#header-info { font-size: 1.1rem; font-weight: bold; color: var(--board-bg); background: #f0f0f0; padding: 8px 20px; border-radius: 20px; display: inline-block; }
-#current-room-code { color: var(--green-piece-2); font-family: monospace; }
-#setup-controls { margin-top: 10px; }
-.bot-btn { background: var(--highlight); border: none; padding: 8px 20px; color: var(--board-bg); border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+#header-info { font-size: 1.2rem; font-weight: bold; color: #3e2723; padding: 5px; }
 
-/* --- DAS NEUE BRETT --- */
+/* WICHTIG: Identitäts-Anzeige */
+#identity-badge {
+    display: inline-block; padding: 5px 15px; border-radius: 20px; 
+    background: #eee; color: #555; font-size: 0.9rem; margin-top: 5px;
+    border: 2px solid #ccc;
+}
+
+#setup-controls { margin-top: 5px; }
+.action-btn { background: #ffa726; border: none; padding: 8px 20px; color: white; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #f57c00; }
+.action-btn:active { transform: translateY(3px); box-shadow: none; }
+
+/* DAS BRETT (Helles Holz) */
 .board-wrapper {
     flex: 1; display: flex; justify-content: center; align-items: center; width: 100%;
-    padding: 20px; box-sizing: border-box;
+    padding: 10px; box-sizing: border-box;
 }
 
 #board-container {
-    /* Der MADN-Style Kasten */
-    width: min(95vw, calc(100vh - 250px)); /* Quadratisch, responsiv */
-    height: min(95vw, calc(100vh - 250px));
+    width: min(95vw, calc(100vh - 220px));
+    height: min(95vw, calc(100vh - 220px));
     position: relative;
     background-color: var(--board-bg);
-    border-radius: 25px; /* Runde Ecken */
-    padding: 25px; /* Dicker Rahmen */
-    /* Doppelter Schatten für Tiefe und eine leichte Kante innen */
+    border-radius: 30px;
+    padding: 20px;
+    /* 3D-Effekt für das Brett */
     box-shadow: 
-        0 30px 60px rgba(0,0,0,0.5),
-        inset 0 5px 10px rgba(255,255,255,0.1),
-        inset 0 -5px 10px rgba(0,0,0,0.3);
-    border: 4px solid #34495e;
+        0 20px 50px rgba(0,0,0,0.4),
+        inset 0 0 0 5px rgba(255,255,255,0.4), /* Helle Kante */
+        inset 0 0 20px rgba(139, 69, 19, 0.1); /* Holzschattierung */
+    border: 8px solid var(--board-border);
 }
 
 #board {
@@ -76,99 +95,77 @@ body {
     display: grid;
     grid-template-rows: repeat(17, 1fr); 
     grid-template-columns: repeat(25, 1fr);
-    /* GEOMETRIE-FIX: Damit der Stern gleichmäßiger wirkt, 
-       müssen wir das Verhältnis von Breite zu Höhe anpassen (Hex-Grid Mathematik) */
-    aspect-ratio: 25 / 15; /* Experimenteller Wert, staucht die Höhe etwas */
+    aspect-ratio: 25 / 15; /* Korrektur für Hex-Proportion */
 }
 
-/* DIE FELDER (MULDEN) */
+/* DIE MULDEN (Löcher) */
 .cell {
-    width: 85%; height: 85%; margin: auto;
+    width: 80%; height: 80%; margin: auto;
     border-radius: 50%;
     background-color: var(--hole-bg);
     position: relative;
-    /* Innerer Schatten lässt es wie ein Loch wirken */
-    box-shadow: inset 3px 3px 8px rgba(0,0,0,0.6), inset -1px -1px 3px rgba(255,255,255,0.1);
-    transition: all 0.2s;
+    box-shadow: var(--hole-shadow);
+    transition: background 0.3s;
 }
 .cell.void { background: transparent; box-shadow: none; pointer-events: none; }
 
-/* --- DIE NEUEN FIGUREN (MADN STIL) --- */
+/* ZONEN MARKIERUNG (Damit man weiß, wer wo wohnt) */
+.cell.base-red { background-color: var(--zone-red); border: 1px solid rgba(231, 76, 60, 0.3); }
+.cell.base-green { background-color: var(--zone-green); border: 1px solid rgba(46, 204, 113, 0.3); }
+
+/* FIGUR (MADN Stil beibehalten) */
 .piece {
-    width: 85%; height: 85%; /* Etwas kleiner als das Loch */
+    width: 85%; height: 85%;
     border-radius: 50%;
     position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%); /* Zentrieren */
-    cursor: pointer;
+    transform: translate(-50%, -50%);
     z-index: 10;
-
-    /* DER MADN LOOK: */
-    border: 2px solid rgba(255,255,255,0.9); /* Heller Rand */
-    /* Starker Schlagschatten für den 3D-Effekt */
-    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
-    
-    /* Leichter Farbverlauf für Plastizität */
-    background: linear-gradient(135deg, var(--piece-color-1), var(--piece-color-2));
-
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy Effekt */
+    border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, var(--p-c1), var(--p-c2));
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Standardmäßig kein Pointer, nur wenn eigene! */
+    cursor: default; 
 }
-
-/* Das "Hütchen" oben drauf (Der MADN Glanzpunkt) */
+/* Glanzpunkt */
 .piece::after {
-    content: '';
-    position: absolute;
-    top: 15%; left: 15%;
-    width: 40%; height: 40%;
-    background-color: rgba(255,255,255,0.3); /* Halbtransparenter Glanz */
-    border-radius: 50%;
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+    content: ''; position: absolute; top: 15%; left: 15%; width: 35%; height: 35%;
+    background: rgba(255,255,255,0.4); border-radius: 50%;
 }
 
-/* Farbzuweisung über CSS Variablen */
-.piece.red { --piece-color-1: var(--red-piece-1); --piece-color-2: var(--red-piece-2); }
-.piece.green { --piece-color-1: var(--green-piece-1); --piece-color-2: var(--green-piece-2); }
+.piece.red { --p-c1: var(--red-piece-1); --p-c2: var(--red-piece-2); }
+.piece.green { --p-c1: var(--green-piece-1); --p-c2: var(--green-piece-2); }
+
+/* Feedback: Das sind MEINE Steine */
+.piece.mine {
+    cursor: pointer; /* Zeigefinger */
+}
+.piece.mine:hover {
+    transform: translate(-50%, -55%) scale(1.05); /* Leichtes Anheben */
+}
 
 /* Ausgewählt */
 .piece.selected {
     border-color: var(--highlight);
-    /* Leuchtet und schwebt nach oben */
-    box-shadow: 0 0 20px var(--highlight), 5px 5px 15px rgba(0,0,0,0.6);
-    transform: translate(-50%, -60%) scale(1.15); /* Schwebt höher */
+    box-shadow: 0 0 15px var(--highlight);
+    transform: translate(-50%, -60%) scale(1.2);
     z-index: 100;
 }
 
-/* MÖGLICHE ZÜGE */
+/* Valid Move Targets */
 .cell.valid-move {
-    background-color: rgba(241, 196, 15, 0.3);
-    box-shadow: inset 0 0 15px var(--highlight);
+    background-color: rgba(255, 255, 0, 0.3);
+    box-shadow: inset 0 0 10px #f1c40f;
     cursor: pointer;
 }
-/* Ein kleiner Punkt im Zielfeld */
 .cell.valid-move::after {
-    content: ''; position: absolute;
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 30%; height: 30%; border-radius: 50%;
-    background: var(--highlight);
-    box-shadow: 0 0 10px var(--highlight);
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 30%; height: 30%; background: #f1c40f; border-radius: 50%;
 }
 
 /* FOOTER */
-.controls { padding: 15px; text-align: center; width: 100%; background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
-.emote-bar { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-.emote-btn { background: #f0f0f0; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: transform 0.1s, background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.emote-btn:hover { transform: scale(1.1); background: white; }
-.emote-btn:active { transform: scale(0.9); }
-#log-container { font-weight: bold; min-height: 24px; color: var(--board-bg); }
+.controls { padding: 15px; width: 100%; background: #fff8e1; border-top: 3px solid #8d6e63; text-align: center; }
+#log-container { font-weight: bold; color: #5d4037; font-size: 1.1rem; min-height: 25px;}
 
-/* EMOJIS */
-.floating-emoji {
-    position: fixed; top: 50%; left: 50%; font-size: 4rem;
-    animation: floatUp 2.5s ease-out forwards; pointer-events: none; z-index: 9999;
-    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-@keyframes floatUp {
-    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
-    10% { transform: translate(-50%, -30px) scale(1.2); opacity: 1; }
-    80% { opacity: 1; }
-    100% { transform: translate(-50%, -250px) scale(0.8); opacity: 0; }
-}
+.emote-bar button { font-size: 1.5rem; background: transparent; border: none; cursor: pointer; transition: transform 0.1s;}
+.emote-bar button:hover { transform: scale(1.2); }
