@@ -1,7 +1,7 @@
 {
   "name": "halma-web-app",
   "version": "1.0.0",
-  "description": "Halma Multiplayer Web App",
+  "description": "Halma Multiplayer",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
