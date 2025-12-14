@@ -76,15 +76,14 @@ body {
     overflow: hidden;
 }
 
-/* --- DER PERFEKTE HEX-GRID CONTAINER --- */
+/* --- DER PERFEKTE QUADRATISCHE KASTEN --- */
 #board-container {
-    /* MATHEMATISCHE KORREKTUR: Ratio 1.7 staucht das Grid in die korrekte Hex-Form */
-    aspect-ratio: 1.7 / 1; 
+    /* DER FIX: Wir erzwingen ein perfektes Quadrat */
+    aspect-ratio: 1 / 1; 
 
-    /* Responsive Größe: 95% vom Kleinsten (Breite oder Höhe) */
+    /* Responsive Größe: Nimm 95% vom kleineren Wert (Breite oder Höhe) */
     width: 95vmin;
-    max-width: 100%;
-    max-height: 100%; 
+    max-width: 100%; max-height: 100%; 
 
     margin: auto;
     border-radius: 15px; 
@@ -109,12 +108,14 @@ body {
     grid-template-columns: repeat(25, 1fr);
 }
 
-/* --- FELDER --- */
+/* --- FELDER (PERFEKTE KREISE ERZWINGEN) --- */
 .cell {
-    /* Breite relativ zur Spalte, Höhe automatisch durch 1:1 */
+    /* Breite relativ zur Spalte */
     width: 80%; 
+    /* Höhe passt sich automatisch an */
     height: auto;
-    aspect-ratio: 1/1; 
+    /* WICHTIG: Erzwingt Kreisform, egal wie das Gitter gestaucht wird */
+    aspect-ratio: 1 / 1; 
     
     margin: auto;
     border-radius: 50%; 
