@@ -44,7 +44,7 @@ body {
 .join-area { display: flex; gap: 10px; } .join-area input, .join-area button { margin: 0; flex: 1; }
 .divider { margin: 15px 0; color: #666; font-size: 0.8rem; }
 
-/* --- GAME VIEW LAYOUT --- */
+/* --- GAME VIEW --- */
 #game-view {
     display: flex;
     flex-direction: column;
@@ -58,7 +58,7 @@ body {
     border-bottom: 1px solid var(--board-rim);
     display: flex; justify-content: space-between; align-items: center;
     box-shadow: 0 5px 20px rgba(0,0,0,0.6); z-index: 100;
-    height: 70px;
+    height: 60px; /* Etwas flacher für mehr Platz */
 }
 .info-group { display: flex; flex-direction: column; align-items: flex-start; }
 .info-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
@@ -66,25 +66,33 @@ body {
 #identity-badge { padding: 5px 12px; border-radius: 4px; background: rgba(0,0,0,0.4); border: 1px solid #444; font-size: 0.85rem; letter-spacing: 1px; }
 #setup-controls .action-btn { background: var(--board-rim); color: #000; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2); }
 
-/* --- DER MITTELTEIL --- */
+/* --- BOARD WRAPPER --- */
 .board-wrapper {
     flex: 1 1 auto;
     display: flex; justify-content: center; align-items: center;
-    width: 100%; position: relative; overflow: hidden;
-    padding: 10px; box-sizing: border-box;
+    width: 100%; 
+    padding: 10px; 
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
+/* --- DER PERFEKTE HOLZKASTEN --- */
 #board-container {
-    /* KORREKTUR: Das natürliche Verhältnis von 25 Spalten zu 17 Zeilen */
-    aspect-ratio: 25 / 17;
-    
-    /* Skalierung: Nimm so viel Platz wie möglich, ohne das Verhältnis zu brechen */
-    width: 100%; height: 100%;
-    max-width: 100%; max-height: 100%;
-    margin: auto;
+    /* MAGISCHE FORMEL FÜR UNVERZERRTEN STERN:
+       Verhältnis 1.35 (Breite zu Höhe) sorgt dafür, dass die Kreise rund bleiben 
+       bei diesem speziellen 25x17 Gitter */
+    aspect-ratio: 1.35 / 1; 
 
+    /* Responsive Größe: 
+       Entweder 95% der Breite ODER 95% der verfügbaren Höhe.
+       vmin nimmt automatisch den kleineren Wert. */
+    width: 95vmin;
+    max-width: 100%;
+    max-height: 100%; 
+
+    margin: auto;
     border-radius: 15px; 
-    padding: 2%; /* Relatives Padding */
+    padding: 2.5%; /* Relatives Padding */
     
     background-color: var(--board-bg);
     background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 10px);
@@ -95,23 +103,26 @@ body {
         inset 0 0 40px rgba(0,0,0,0.8);
     border: 1px solid #000;
     box-sizing: border-box;
+    display: flex; /* Zentriert das Grid innen */
 }
 
 #board {
     width: 100%; height: 100%;
     display: grid;
+    /* Festes Gitter */
     grid-template-rows: repeat(17, 1fr); 
     grid-template-columns: repeat(25, 1fr);
 }
 
-/* --- FELDER (GEOMETRIE-FIX) --- */
+/* --- FELDER --- */
 .cell {
-    /* Wir geben eine relative Breite an */
-    width: 80%; 
-    /* Aber die Höhe wird automatisch berechnet durch aspect-ratio! */
-    height: auto; 
-    /* DAS ZWINGT ES ZUM PERFEKTEN KREIS: */
-    aspect-ratio: 1 / 1; 
+    /* Da der Container jetzt das korrekte Ratio hat, 
+       sind die Zellen automatisch fast quadratisch. */
+    width: 85%; 
+    height: 85%;
+    
+    /* Sicherheitsnetz: Erzwinge Kreisform */
+    aspect-ratio: 1/1;
     
     margin: auto;
     border-radius: 50%; 
@@ -125,16 +136,19 @@ body {
 
 /* --- FIGUREN --- */
 .piece {
-    /* Auch hier: Perfekte Kreise erzwingen */
-    width: 85%; height: auto; aspect-ratio: 1 / 1;
+    width: 90%; height: 90%; border-radius: 50%; 
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    z-index: 10; cursor: default;
     
-    border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; cursor: default;
-    border: 1px solid rgba(255,255,255,0.3); box-shadow: 2px 2px 8px rgba(0,0,0,0.8), inset 0 -5px 10px rgba(0,0,0,0.5);
-    background: radial-gradient(circle at 30% 30%, var(--p-c1), var(--p-c2)); transition: all 0.2s;
+    border: 1px solid rgba(255,255,255,0.3); 
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.8), inset 0 -5px 10px rgba(0,0,0,0.5);
+    background: radial-gradient(circle at 30% 30%, var(--p-c1), var(--p-c2)); 
+    transition: all 0.2s;
 }
 .piece::after { content: ''; position: absolute; top: 15%; left: 15%; width: 25%; height: 25%; background: rgba(255,255,255,0.6); border-radius: 50%; filter: blur(2px); }
 .piece.red { --p-c1: #ff5252; --p-c2: #800000; } .piece.green { --p-c1: #69f0ae; --p-c2: #004d40; }
-.piece.mine { cursor: pointer; } .piece.mine:hover { transform: translate(-50%, -55%) scale(1.05); filter: brightness(1.1); }
+.piece.mine { cursor: pointer; } 
+.piece.mine:hover { transform: translate(-50%, -55%) scale(1.05); filter: brightness(1.1); }
 .piece.selected { border-color: var(--highlight); box-shadow: 0 0 20px var(--highlight), 5px 10px 20px rgba(0,0,0,0.8); transform: translate(-50%, -65%) scale(1.2); z-index: 100; }
 .cell.valid-move { box-shadow: inset 0 0 10px var(--highlight); cursor: pointer; }
 .cell.valid-move::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%; height: 30%; background: var(--highlight); border-radius: 50%; box-shadow: 0 0 10px var(--highlight); }
