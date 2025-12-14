@@ -44,7 +44,7 @@ body {
 .join-area { display: flex; gap: 10px; } .join-area input, .join-area button { margin: 0; flex: 1; }
 .divider { margin: 15px 0; color: #666; font-size: 0.8rem; }
 
-/* --- GAME VIEW --- */
+/* --- GAME VIEW LAYOUT --- */
 #game-view {
     display: flex;
     flex-direction: column;
@@ -58,7 +58,7 @@ body {
     border-bottom: 1px solid var(--board-rim);
     display: flex; justify-content: space-between; align-items: center;
     box-shadow: 0 5px 20px rgba(0,0,0,0.6); z-index: 100;
-    height: 60px; /* Etwas flacher für mehr Platz */
+    height: 60px;
 }
 .info-group { display: flex; flex-direction: column; align-items: flex-start; }
 .info-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
@@ -76,23 +76,19 @@ body {
     overflow: hidden;
 }
 
-/* --- DER PERFEKTE HOLZKASTEN --- */
+/* --- DER PERFEKTE HEX-GRID CONTAINER --- */
 #board-container {
-    /* MAGISCHE FORMEL FÜR UNVERZERRTEN STERN:
-       Verhältnis 1.35 (Breite zu Höhe) sorgt dafür, dass die Kreise rund bleiben 
-       bei diesem speziellen 25x17 Gitter */
-    aspect-ratio: 1.35 / 1; 
+    /* MATHEMATISCHE KORREKTUR: Ratio 1.7 staucht das Grid in die korrekte Hex-Form */
+    aspect-ratio: 1.7 / 1; 
 
-    /* Responsive Größe: 
-       Entweder 95% der Breite ODER 95% der verfügbaren Höhe.
-       vmin nimmt automatisch den kleineren Wert. */
+    /* Responsive Größe: 95% vom Kleinsten (Breite oder Höhe) */
     width: 95vmin;
     max-width: 100%;
     max-height: 100%; 
 
     margin: auto;
     border-radius: 15px; 
-    padding: 2.5%; /* Relatives Padding */
+    padding: 2.5%; 
     
     background-color: var(--board-bg);
     background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 10px);
@@ -103,26 +99,22 @@ body {
         inset 0 0 40px rgba(0,0,0,0.8);
     border: 1px solid #000;
     box-sizing: border-box;
-    display: flex; /* Zentriert das Grid innen */
+    display: flex;
 }
 
 #board {
     width: 100%; height: 100%;
     display: grid;
-    /* Festes Gitter */
     grid-template-rows: repeat(17, 1fr); 
     grid-template-columns: repeat(25, 1fr);
 }
 
 /* --- FELDER --- */
 .cell {
-    /* Da der Container jetzt das korrekte Ratio hat, 
-       sind die Zellen automatisch fast quadratisch. */
-    width: 85%; 
-    height: 85%;
-    
-    /* Sicherheitsnetz: Erzwinge Kreisform */
-    aspect-ratio: 1/1;
+    /* Breite relativ zur Spalte, Höhe automatisch durch 1:1 */
+    width: 80%; 
+    height: auto;
+    aspect-ratio: 1/1; 
     
     margin: auto;
     border-radius: 50%; 
