@@ -7,6 +7,8 @@ app.use(express.static('public'));
 
 // --- HALMA KONFIGURATION ---
 const TURN_ORDER = ['red', 'green'];
+
+// Startpositionen für 2 Spieler (17x25 Grid)
 const START_POSITIONS = {
     'red': [ // Unten (Spitze)
         {x: 12, y: 16}, 
@@ -22,6 +24,7 @@ const START_POSITIONS = {
     ]
 };
 
+// Sieg-Zonen (Das Ziel ist das Haus des Gegners)
 const WIN_ZONES = {
     'red': START_POSITIONS['green'],
     'green': START_POSITIONS['red']
@@ -42,11 +45,11 @@ io.on('connection', (socket) => {
     socket.on('requestJoin', (data) => {
         const roomId = (data.roomId || "").toUpperCase();
         if (!games[roomId]) { socket.emit('joinError', 'Raum nicht gefunden!'); return; }
-        if (Object.keys(games[roomId].players).length >= 2) { socket.emit('joinError', 'Raum voll!'); return; }
+        if (Object.keys(games[roomId].players).length >= 2) { socket.emit('joinError', 'Raum ist voll!'); return; }
         joinRoom(socket, roomId, data.name);
     });
 
-    // STARTEN (Wichtig!)
+    // STARTEN
     socket.on('startGame', () => {
         const roomId = socket.data.roomId;
         if(roomId && games[roomId]) {
@@ -57,7 +60,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // BEWEGUNG
+    // ZUG MACHEN
     socket.on('movePiece', (data) => {
         const roomId = socket.data.roomId;
         if (!roomId || !games[roomId]) return;
@@ -65,22 +68,13 @@ io.on('connection', (socket) => {
         const game = games[roomId];
         const player = game.players[socket.id];
 
-        // 1. Ist das Spiel aktiv?
-        if (!game.running) {
-            socket.emit('gameLog', 'Spiel muss erst gestartet werden!');
-            return;
-        }
+        if (!game.running) { socket.emit('gameLog', 'Spiel muss erst gestartet werden!'); return; }
+        if (player.color !== TURN_ORDER[game.turnIndex]) { socket.emit('gameLog', 'Nicht dein Zug!'); return; }
 
-        // 2. Ist der Spieler dran?
-        if (player.color !== TURN_ORDER[game.turnIndex]) {
-            socket.emit('gameLog', 'Nicht dein Zug!');
-            return;
-        }
-
-        // 3. Zug anwenden
+        // Zug anwenden
         player.pieces[data.pieceIndex] = data.target;
 
-        // 4. Sieg checken
+        // Sieg prüfen
         if (checkWin(player)) {
             io.to(roomId).emit('gameLog', `${player.name} GEWINNT! 🏆`);
             io.to(roomId).emit('playSound', 'win');
@@ -120,7 +114,6 @@ function joinRoom(socket, roomId, playerName) {
     const playerIdx = Object.keys(game.players).length;
     const color = TURN_ORDER[playerIdx];
     
-    // Deep copy der Positionen
     const myPieces = JSON.parse(JSON.stringify(START_POSITIONS[color]));
 
     game.players[socket.id] = {
@@ -133,8 +126,7 @@ function joinRoom(socket, roomId, playerName) {
     socket.emit('joinSuccess', { id: socket.id, roomId: roomId, players: game.players });
     io.to(roomId).emit('updateBoard', game.players);
     
-    // WICHTIG: Sobald 1 Spieler da ist, zeigen wir den Start-Button (zum Testen)
-    // Wenn 2 da sind, ist es ein echtes Match.
+    // Ermöglicht Solo-Test und Spielstart
     io.to(roomId).emit('readyToStart', true);
 }
 
