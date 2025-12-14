@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Halma Master</title>
+    <title>Halma Royal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     
     <div id="landing-view">
         <div class="landing-card">
-            <h1>Halma Master</h1>
-            <p>Das klassische Strategie-Spiel</p>
-            <input type="text" id="landingNameInput" placeholder="Dein Spielername" maxlength="12">
+            <h1 style="color:#d4af37">HALMA ROYAL</h1>
+            <p>Strategie in Perfektion</p>
+            <input type="text" id="landingNameInput" placeholder="Spielername" maxlength="12">
             <div class="landing-actions">
-                <button id="createGameBtn" class="big-btn">Neues Spiel</button>
-                <div class="divider">ODER</div>
+                <button id="createGameBtn" class="big-btn">Spiel erstellen</button>
+                <div class="divider">///</div>
                 <div class="join-area">
-                    <input type="text" id="roomCodeInput" placeholder="Raum-Code" maxlength="4">
+                    <input type="text" id="roomCodeInput" placeholder="Code" maxlength="4">
                     <button id="joinGameBtn" class="big-btn outline">Beitreten</button>
                 </div>
             </div>
@@ -26,32 +26,39 @@
     </div>
 
     <div id="game-view" style="display:none;">
+        
         <div class="top-section">
-            <div id="header-info">
-                Raum: <span id="current-room-code">----</span> | 
-                <span id="turn-indicator">Am Zug: <span id="current-player-name">...</span></span>
+            <div class="info-group">
+                <span class="info-label">Raum</span>
+                <span class="info-value" id="current-room-code">----</span>
             </div>
-            <div>
-                <span id="identity-badge">Du bist: <b id="my-color-display">...</b></span>
+            
+            <div id="identity-badge">Zuschauer</div>
+
+            <div class="info-group" style="align-items: flex-end;">
+                <span class="info-label">Status</span>
+                <span class="info-value" id="turn-indicator">Warte...</span>
             </div>
-            <div id="setup-controls">
-                <button id="startBtn" class="action-btn" style="display:none;">SPIEL STARTEN</button>
-            </div>
+        </div>
+        
+        <div id="setup-controls" style="position:absolute; top: 80px; z-index: 90; width: 100%; text-align: center;">
+            <button id="startBtn" class="action-btn" style="display:none;">PARTIE BEGINNEN</button>
         </div>
 
         <div class="board-wrapper">
             <div id="board-container">
+                <svg id="lines-layer" class="connection-lines" width="100%" height="100%"></svg>
                 <div id="board"></div>
             </div>
         </div>
 
         <div class="controls">
-            <div id="log-container">Warte auf Gegner...</div>
+            <div id="log-container">Willkommen in der Lobby</div>
             <div class="emote-bar">
+                <button class="emote-btn">👑</button>
                 <button class="emote-btn">🤔</button>
-                <button class="emote-btn">😎</button>
-                <button class="emote-btn">👏</button>
-                <button class="emote-btn">❌</button>
+                <button class="emote-btn">✨</button>
+                <button class="emote-btn">🏳️</button>
             </div>
         </div>
     </div>
