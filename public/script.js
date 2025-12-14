@@ -53,10 +53,8 @@ function initBoard() {
             boardElement.appendChild(cell);
         }
     }
-    // KEINE drawLines() MEHR
 }
 initBoard();
-// KEIN Resize Listener mehr nötig für JS
 
 // --- INTERAKTION ---
 function onCellClick(x, y) {
@@ -196,7 +194,7 @@ socket.on('readyToStart', () => {
 
 socket.on('joinSuccess', (data) => {
     landingView.style.display = 'none'; 
-    gameView.style.display = 'flex'; // WICHTIG für Flexbox Layout
+    gameView.style.display = 'flex'; 
     myColor = data.players[data.id].color;
     
     const badge = document.getElementById('identity-badge');
