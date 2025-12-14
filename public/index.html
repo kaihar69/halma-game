@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Halma Royal</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,8 +10,8 @@
     
     <div id="landing-view">
         <div class="landing-card">
-            <h1 style="color:#d4af37">HALMA ROYAL</h1>
-            <p>Strategie in Perfektion</p>
+            <h1 style="color:#d4af37; margin-bottom:5px;">HALMA ROYAL</h1>
+            <p style="margin-top:0; color:#888;">Strategie in Perfektion</p>
             <input type="text" id="landingNameInput" placeholder="Spielername" maxlength="12">
             <div class="landing-actions">
                 <button id="createGameBtn" class="big-btn">Spiel erstellen</button>
@@ -21,7 +21,7 @@
                     <button id="joinGameBtn" class="big-btn outline">Beitreten</button>
                 </div>
             </div>
-            <div id="landing-msg"></div>
+            <div id="landing-msg" style="color:#c0392b; margin-top:10px; min-height:20px;"></div>
         </div>
     </div>
 
@@ -32,9 +32,7 @@
                 <span class="info-label">Raum</span>
                 <span class="info-value" id="current-room-code">----</span>
             </div>
-            
             <div id="identity-badge">Zuschauer</div>
-
             <div class="info-group" style="align-items: flex-end;">
                 <span class="info-label">Status</span>
                 <span class="info-value" id="turn-indicator">Warte...</span>
@@ -47,7 +45,6 @@
 
         <div class="board-wrapper">
             <div id="board-container">
-                <svg id="lines-layer" class="connection-lines" width="100%" height="100%"></svg>
                 <div id="board"></div>
             </div>
         </div>
