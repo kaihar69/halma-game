@@ -1,5 +1,4 @@
 const socket = io();
-// Sounds
 const sounds = {
     move: new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'),
     win: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
@@ -12,8 +11,6 @@ let currentPlayers = {};
 let selectedPieceIndex = null;
 let validMoves = [];
 
-// --- BRETT DEFINITION ---
-// Wir nutzen exakte 25 Zeichen Breite für das Grid
 const rawMap = [
     "            0            ", 
     "           0 0           ", 
@@ -38,8 +35,7 @@ const boardElement = document.getElementById('board');
 
 function initBoard() {
     boardElement.innerHTML = '';
-    
-    // 1. Felder generieren
+    // Felder generieren
     for (let y = 0; y < starMap.length; y++) {
         const rowStr = starMap[y];
         for (let x = 0; x < rowStr.length; x++) {
@@ -48,10 +44,8 @@ function initBoard() {
                 cell.classList.add('cell');
                 cell.dataset.x = x;
                 cell.dataset.y = y;
-
                 if (y <= 3) cell.classList.add('base-green');
                 if (y >= 13) cell.classList.add('base-red');
-
                 cell.addEventListener('click', () => onCellClick(x, y));
             } else {
                 cell.classList.add('cell', 'void');
@@ -59,61 +53,12 @@ function initBoard() {
             boardElement.appendChild(cell);
         }
     }
-    
-    // 2. Verbindungslinien zeichnen (NEU)
-    drawLines();
+    // KEINE drawLines() MEHR
 }
-
-function drawLines() {
-    const svg = document.getElementById('lines-layer');
-    svg.innerHTML = ''; // Reset
-
-    // Wir gehen durch jedes Feld und verbinden es mit seinen rechten und unteren Nachbarn
-    // So zeichnen wir jede Linie nur einmal.
-    for (let y = 0; y < starMap.length; y++) {
-        for (let x = 0; x < starMap[y].length; x++) {
-            if (starMap[y][x] !== '0') continue;
-
-            // Koordinaten in % umrechnen (Mitte der Zelle)
-            // Grid hat 25 Spalten, 17 Zeilen. Mitte ist index + 0.5
-            const x1 = ((x + 0.5) / 25) * 100;
-            const y1 = ((y + 0.5) / 17) * 100;
-
-            // Nachbarn prüfen (Rechts, Unten-Links, Unten-Rechts)
-            const neighborsToCheck = [
-                {dx: 2, dy: 0},   // Rechts
-                {dx: -1, dy: 1},  // Unten Links
-                {dx: 1, dy: 1}    // Unten Rechts
-            ];
-
-            neighborsToCheck.forEach(n => {
-                const nx = x + n.dx;
-                const ny = y + n.dy;
-
-                // Existiert der Nachbar auf dem Brett?
-                if (ny < starMap.length && nx >= 0 && nx < starMap[ny].length && starMap[ny][nx] === '0') {
-                    const x2 = ((nx + 0.5) / 25) * 100;
-                    const y2 = ((ny + 0.5) / 17) * 100;
-                    
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', x1 + '%');
-                    line.setAttribute('y1', y1 + '%');
-                    line.setAttribute('x2', x2 + '%');
-                    line.setAttribute('y2', y2 + '%');
-                    svg.appendChild(line);
-                }
-            });
-        }
-    }
-}
-
 initBoard();
-// Bei Resize neu zeichnen, falls nötig (eigentlich nicht, da SVG %)
-window.addEventListener('resize', drawLines);
-
+// KEIN Resize Listener mehr nötig für JS
 
 // --- INTERAKTION ---
-
 function onCellClick(x, y) {
     if (selectedPieceIndex !== null) {
         const move = validMoves.find(m => m.x === x && m.y === y);
@@ -204,7 +149,6 @@ function isBoardField(x, y) {
 }
 
 // --- RENDER & SOCKET ---
-
 socket.on('updateBoard', (players) => {
     currentPlayers = players;
     renderPieces();
@@ -235,12 +179,12 @@ const startBtn = document.getElementById('startBtn');
 
 document.getElementById('createGameBtn').addEventListener('click', () => {
     const name = document.getElementById('landingNameInput').value;
-    if(name) socket.emit('createGame', name);
+    if(name) socket.emit('createGame', name); else document.getElementById('landing-msg').innerText = "Name fehlt!";
 });
 document.getElementById('joinGameBtn').addEventListener('click', () => {
     const name = document.getElementById('landingNameInput').value;
     const code = document.getElementById('roomCodeInput').value;
-    if(name && code) socket.emit('requestJoin', {name, roomId: code});
+    if(name && code) socket.emit('requestJoin', {name, roomId: code}); else document.getElementById('landing-msg').innerText = "Daten fehlen!";
 });
 
 startBtn.addEventListener('click', () => socket.emit('startGame'));
@@ -252,10 +196,9 @@ socket.on('readyToStart', () => {
 
 socket.on('joinSuccess', (data) => {
     landingView.style.display = 'none'; 
-    gameView.style.display = 'block';
+    gameView.style.display = 'flex'; // WICHTIG für Flexbox Layout
     myColor = data.players[data.id].color;
     
-    // Header Info Update
     const badge = document.getElementById('identity-badge');
     badge.innerText = myColor === 'red' ? "SPIELER ROT" : "SPIELER GRÜN";
     badge.style.color = myColor === 'red' ? "#ffcccc" : "#ccffcc";
@@ -280,6 +223,7 @@ socket.on('turnUpdate', (color) => {
 });
 
 socket.on('gameLog', (msg) => document.getElementById('log-container').innerText = msg);
+socket.on('joinError', (msg) => document.getElementById('landing-msg').innerText = msg);
 socket.on('playSound', (type) => { if(sounds[type]) sounds[type].play().catch(()=>{}); });
 
 document.querySelectorAll('.emote-btn').forEach(btn => {
