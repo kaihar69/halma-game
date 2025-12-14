@@ -24,7 +24,7 @@ body {
     background: var(--body-bg); background-image: var(--body-texture);
     margin: 0; padding: 0;
     /* WICHTIG FÜR MOBILE: Fixe Höhe, kein Scrollen */
-    height: 100vh; height: 100dvh; /* dvh für mobile Browser Bars */
+    height: 100vh; height: 100dvh; 
     overflow: hidden;
     color: var(--text-color);
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
@@ -45,16 +45,16 @@ body {
 .join-area { display: flex; gap: 10px; } .join-area input, .join-area button { margin: 0; flex: 1; }
 .divider { margin: 15px 0; color: #666; font-size: 0.8rem; }
 
-/* --- GAME VIEW LAYOUT (FLEX-SYSTEM) --- */
+/* --- GAME VIEW LAYOUT --- */
 #game-view {
     display: flex;
     flex-direction: column;
     height: 100%; width: 100%;
 }
 
-/* HEADER (Fixe Größe) */
+/* HEADER */
 .top-section { 
-    flex: 0 0 auto; /* Darf nicht schrumpfen */
+    flex: 0 0 auto; 
     padding: 10px 20px; width: 100%; box-sizing: border-box;
     background: linear-gradient(to bottom, #2c2c2c, #1a1a1a);
     border-bottom: 1px solid var(--board-rim);
@@ -68,60 +68,56 @@ body {
 #identity-badge { padding: 5px 12px; border-radius: 4px; background: rgba(0,0,0,0.4); border: 1px solid #444; font-size: 0.85rem; letter-spacing: 1px; }
 #setup-controls .action-btn { background: var(--board-rim); color: #000; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2); }
 
-/* MITTELTEIL (Nimmt den restlichen Platz) */
+/* MITTELTEIL */
 .board-wrapper {
-    flex: 1 1 auto; /* Wächst und schrumpft um Platz zu füllen */
+    flex: 1 1 auto;
     display: flex; justify-content: center; align-items: center;
     width: 100%; position: relative; overflow: hidden;
     padding: 10px; box-sizing: border-box;
 }
 
-/* DER HOLZKASTEN (DER FIX IST HIER) */
+/* DER HOLZKASTEN (GEOMETRIE-FIX) */
 #board-container {
-    /* KORREKTUR DER VERZERRUNG:
-       Wir nutzen das exakte Raster-Verhältnis (25 Spalten / 17 Zeilen).
-       Das verhindert, dass es zu breit wird. */
-    aspect-ratio: 25 / 17; 
+    /* 1:1 Verhältnis erzwingen -> Das macht den Stern quadratisch/gleichmäßig */
+    aspect-ratio: 1 / 1; 
     
-    /* Wir erlauben 100% Breite/Höhe, aber das aspect-ratio 
-       wird die tatsächliche Größe begrenzen, je nachdem, 
-       ob der Bildschirm höher oder breiter ist. */
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-
-    /* Zentrierung passiert durch den Parent (.board-wrapper flex), 
-       aber margin: auto schadet nicht. */
+    /* Maximal so breit/hoch wie der verfügbare Platz */
+    width: 100%; height: 100%;
+    max-width: 100%; max-height: 100%;
+    
+    /* WICHTIG: Damit das Seitenverhältnis auch wirklich greift: */
+    min-height: 0; min-width: 0; 
+    
     margin: auto;
+    position: relative; /* Wichtig für margin:auto Center */
 
-    /* Styling bleibt edel */
-    box-sizing: border-box; /* Wichtig, damit Padding nicht die Ratio sprengt */
+    /* Edler Look */
     border-radius: 15px; 
-    padding: 25px; /* Dicker Holzrahmen */
-    
+    padding: 25px; 
     background-color: var(--board-bg);
-    /* Feine Holzmaserung */
     background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 10px);
     
     box-shadow: 
-        0 30px 60px rgba(0,0,0,0.8), /* Tiefer Schatten */
-        inset 0 0 0 2px var(--board-rim), /* Goldkante innen */
-        inset 0 0 40px rgba(0,0,0,0.8); /* Vignette innen */
+        0 30px 60px rgba(0,0,0,0.8), 
+        inset 0 0 0 2px var(--board-rim), 
+        inset 0 0 40px rgba(0,0,0,0.8);
     border: 1px solid #000;
+    box-sizing: border-box;
 }
 
 #board {
     width: 100%; height: 100%; position: relative; z-index: 1;
     display: grid;
+    /* Da der Container jetzt quadratisch (1:1) ist, werden die Zellen
+       automatisch in die richtige Form gepresst */
     grid-template-rows: repeat(17, 1fr); 
     grid-template-columns: repeat(25, 1fr);
-    /* aspect-ratio hier entfernt, da der Container es jetzt regelt */
 }
 
-/* --- FELDER & FIGUREN (Unverändert edel) --- */
+/* --- FELDER & FIGUREN --- */
 .cell {
-    width: 75%; height: 75%; margin: auto;
+    /* 85% Größe sorgt für schöne Abstände zwischen den Löchern */
+    width: 85%; height: 85%; margin: auto;
     border-radius: 50%; background-color: var(--hole-bg); position: relative;
     box-shadow: var(--hole-shadow), 0 0 0 1px rgba(255,255,255,0.05);
 }
@@ -130,7 +126,7 @@ body {
 .cell.base-green { background-color: var(--zone-green); box-shadow: var(--hole-shadow), inset 0 0 10px var(--zone-green); }
 
 .piece {
-    width: 82%; height: 82%; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; cursor: default;
+    width: 90%; height: 90%; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; cursor: default;
     border: 1px solid rgba(255,255,255,0.3); box-shadow: 2px 2px 8px rgba(0,0,0,0.8), inset 0 -5px 10px rgba(0,0,0,0.5);
     background: radial-gradient(circle at 30% 30%, var(--p-c1), var(--p-c2)); transition: all 0.2s;
 }
@@ -141,9 +137,9 @@ body {
 .cell.valid-move { box-shadow: inset 0 0 10px var(--highlight); cursor: pointer; }
 .cell.valid-move::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30%; height: 30%; background: var(--highlight); border-radius: 50%; box-shadow: 0 0 10px var(--highlight); }
 
-/* --- FOOTER (Nimmt sich Platz, schrumpft nicht) --- */
+/* --- FOOTER --- */
 .controls { 
-    flex: 0 0 auto; /* Darf nicht schrumpfen */
+    flex: 0 0 auto;
     padding: 15px; width: 100%; text-align: center; background: #1a1a1a; 
     border-top: 1px solid #333; box-sizing: border-box;
 }
